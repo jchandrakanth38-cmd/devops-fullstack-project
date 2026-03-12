@@ -1,0 +1,26 @@
+image: atlassian/default-image:3
+
+pipelines:
+  default:
+    - step:
+        name: Build and Push Docker Images
+        services:
+          - docker
+        script:
+          - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          - docker build -t saichandrakanth/frontend ./frontend
+          - docker build -t saichandrakanth/backend ./backend
+          - docker push saichandrakanth/frontend
+          - docker push saichandrakanth/backend
+
+    - step:
+        name: Terraform Apply
+        script:
+          - cd terraform
+          - terraform init
+          - terraform apply -auto-approve
+
+    - step:
+        name: Deploy to Kubernetes
+        script:
+          - kubectl apply -f kubernetes/
